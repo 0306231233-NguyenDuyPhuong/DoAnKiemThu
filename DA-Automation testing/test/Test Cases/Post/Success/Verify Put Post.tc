@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TestCaseEntity>
+   <description></description>
+   <name>Verify Put Post</name>
+   <tag></tag>
+   <comment></comment>
+   <recordOption>OTHER</recordOption>
+   <testCaseGuid>379edb0d-9a11-45cb-ad0f-dbe0c405e1d5</testCaseGuid>
+</TestCaseEntity>
