@@ -10,7 +10,7 @@ class Product {
   String brand;
   String sku;
   List<String> images;
-  int quantity; 
+  int quantity;
 
   Product({
     required this.id,
@@ -24,7 +24,7 @@ class Product {
     required this.brand,
     required this.sku,
     required this.images,
-    this.quantity = 1, 
+    this.quantity = 1,
   });
 
 
@@ -43,11 +43,11 @@ class Product {
       images: (json["images"] != null && json["images"] is List)
           ? List<String>.from(json["images"])
           : [],
-      quantity: 1, 
+      quantity: 1,
     );
   }
 
- 
+
   Map<String, dynamic> toJson() {
     return {
       "id": id,

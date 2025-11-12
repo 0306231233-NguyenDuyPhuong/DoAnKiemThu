@@ -150,7 +150,7 @@ class _CartScreenState extends State<CartScreen> {
         },
       ),
 
-   
+
       bottomNavigationBar: Container(
         padding: const EdgeInsets.all(16),
         color: ShopeeColors.primary,
@@ -166,9 +166,9 @@ class _CartScreenState extends State<CartScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.green,
                 padding:
-                    const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                 textStyle:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               onPressed: checkout,
               child: const Text("Thanh toán",style: TextStyle(color: ShopeeColors.white),),
