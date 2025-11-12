@@ -1,121 +1,182 @@
 import 'dart:convert';
-import 'dart:math';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http show Client;
+import 'package:http/http.dart' as http;
 
 import '../models/users.dart';
 import '../widgets/my_colors.dart';
 import 'home_screen.dart';
 
-class login extends StatefulWidget{
-  _login createState()=>_login();
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _login extends State<login>{
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
   @override
-  var txt1=TextEditingController();
-  var txt2=TextEditingController();
-  Widget build(Object context) {
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Kiểm tra admin demo
+    if (username == "quygoku321" && password == "123456789") {
+      setState(() => _isLoading = false);
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Đăng Nhập thất bại"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    final success = await loginApi(username, password);
+
+    setState(() => _isLoading = false);
+
+    if (success) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text("Đăng Nhập thành công"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (_) => const HomeScreen()),
+                );
+              },
+              child: const Text("OK"),
+            ),
+          ],
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Tên đăng nhập hoặc mật khẩu không đúng")),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: ShopeeColors.background,
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("SHOPPING NOW",style: TextStyle(fontSize: 30,color: ShopeeColors.textDark),),
-            Padding(padding: EdgeInsetsGeometry.all(10),child: TextField(
-              decoration: InputDecoration(
-                label: Text("Tên đăng nhập : ",style: TextStyle(color: ShopeeColors.textDark),),
-                border: OutlineInputBorder(
-                    borderSide: BorderSide(color: ShopeeColors.primaryLight,width: 1.5)
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Text(
+                  "SHOPPING NOW",
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: ShopeeColors.textDark,
+                  ),
                 ),
-              ),
-              controller: txt1,
-            )
+                const SizedBox(height: 40),
+                TextFormField(
+                  controller: _usernameController,
+                  decoration: InputDecoration(
+                    labelText: "Tên đăng nhập",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Vui lòng nhập tên đăng nhập"
+                      : null,
+                ),
+                const SizedBox(height: 20),
+                TextFormField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  decoration: InputDecoration(
+                    labelText: "Mật khẩu",
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  validator: (value) => value == null || value.isEmpty
+                      ? "Vui lòng nhập mật khẩu"
+                      : null,
+                ),
+                const SizedBox(height: 30),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: ShopeeColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: _isLoading ? null : _handleLogin,
+                    child: _isLoading
+                        ? const CircularProgressIndicator(color: Colors.white)
+                        : const Text(
+                            "Đăng Nhập",
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: ShopeeColors.white,
+                            ),
+                          ),
+                  ),
+                ),
+              ],
             ),
-            Padding(padding: EdgeInsetsGeometry.all(10),child: TextField(
-              decoration: InputDecoration(
-                  label: Text("Mật khẩu : "),
-                  border: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.deepOrange),
-                  )
-              ),
-              controller: txt2,
-            )
-            ),
-            Padding(padding: EdgeInsetsGeometry.all(10),child: ElevatedButton(onPressed: (){
-              if(txt1.text.isEmpty || txt2.text.isEmpty){
-                final snackBar = SnackBar(
-                  content: const Text('Vui lòng nhập đầy đủ thông tin'),
-                );
-
-                ScaffoldMessenger.of(context as BuildContext).showSnackBar(snackBar);
-              }else{
-                var result=Login(txt1.text, txt2.text);
-                if(txt1.text.toString()=="quygoku321" && txt2.text.toString() =="123456789")
-                {
-                  showDialog(context: context as BuildContext, builder:(context)=>AlertDialog(
-                    title: Text("Đăng Nhập thất bại"),
-                    actions: [
-                      TextButton(onPressed: (){
-                        Navigator.pop(context);
-                      }, child: Text("OK"))
-                    ],
-                  )
-                  );
-                }else{
-                  result.then((e)=>{
-                    if(e==true)
-                      {
-                        showDialog(context: context as BuildContext, builder:(context)=>AlertDialog(
-                          title: Text("Đăng Nhập thành Công"),
-                          actions: [
-                            TextButton(onPressed: (){Navigator.push(context, MaterialPageRoute(builder: (context)=>HomeScreen()));}, child: Text("OK"))
-                          ],
-                        )
-                        )
-                      }
-                  }
-
-                  );
-                }
-
-              }
-            }, child: Text("Đăng Nhập",style: TextStyle(fontSize: 15,color: ShopeeColors.textDark),)),)
-          ],
+          ),
         ),
       ),
     );
   }
 }
 
-Future<bool> Login(String name,String pass) async {
-  bool a=false;
-  var url=Uri.parse("https://dummyjson.com/user/login");
-  var Client=http.Client();
-  User b=User(username: name,password: pass);
-  try{
-    var res = await Client.post(
+// API login
+Future<bool> loginApi(String username, String password) async {
+  bool success = false;
+  var url = Uri.parse("https://dummyjson.com/user/login");
+  var client = http.Client();
+  try {
+    final response = await client.post(
       url,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: jsonEncode(b.toJson()),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({"username": username, "password": password}),
     );
-    var result=jsonDecode(res.body);
-    print(result['accessToken']);
-    if(result['accessToken']!="")
-    {
-      a=true;
+    final result = jsonDecode(response.body);
+    if (result['accessToken'] != null && result['accessToken'].isNotEmpty) {
+      success = true;
     }
-    else
-    {
-      a=false;
-    }
-  }finally{
-    Client.close();
+  } finally {
+    client.close();
   }
-  return a;
+  return success;
 }

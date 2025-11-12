@@ -10,6 +10,7 @@ class Product {
   String brand;
   String sku;
   List<String> images;
+  int quantity; 
 
   Product({
     required this.id,
@@ -23,7 +24,9 @@ class Product {
     required this.brand,
     required this.sku,
     required this.images,
+    this.quantity = 1, 
   });
+
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
@@ -40,8 +43,25 @@ class Product {
       images: (json["images"] != null && json["images"] is List)
           ? List<String>.from(json["images"])
           : [],
+      quantity: 1, 
     );
   }
 
-
+ 
+  Map<String, dynamic> toJson() {
+    return {
+      "id": id,
+      "title": title,
+      "description": description,
+      "category": category,
+      "price": price,
+      "discountPercentage": discountPercentage,
+      "rating": rating,
+      "stock": stock,
+      "brand": brand,
+      "sku": sku,
+      "images": images,
+      "quantity": quantity,
+    };
+  }
 }

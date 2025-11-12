@@ -13,6 +13,23 @@ class ProductDetailScreen extends StatefulWidget {
 }
 
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
+
+  void addToCart(Product product) {
+    bool found = false;
+    for (var item in CartScreen.cartItems) {
+      if (item.id == product.id) {
+        item.quantity++; 
+        found = true;
+        break;
+      }
+    }
+    if (!found) {
+      product.quantity = 1;
+      CartScreen.cartItems.add(product);
+    }
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,73 +37,75 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            IconButton(onPressed: (){
-              Navigator.push(context, MaterialPageRoute(builder: (context)=>CartScreen()));
-            } , icon: Icon(Icons.shopping_cart_rounded, color: ShopeeColors.textGray, size: 30,))
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => CartScreen()),
+                );
+              },
+              icon: Icon(Icons.shopping_cart_rounded, color: ShopeeColors.textGray, size: 30,),
+            )
           ],
         ),
       ),
       body: SingleChildScrollView(
-        child:Padding(
+        child: Padding(
           padding: const EdgeInsets.only(left: 16, right: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Image.network(height: 200, width: 400,widget.url),
-              const SizedBox(height: 20,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("${widget.productData.price}đ", style: TextStyle(fontSize: 20, color: ShopeeColors.primary, fontWeight: FontWeight.bold),),
-                  Row(
-                    children: [
-                      Text("${widget.productData.rating}", style: TextStyle(fontSize: 20, color: ShopeeColors.textDark, fontWeight: FontWeight.bold),),
-                      Icon(Icons.star_rounded, color: Colors.yellow, size: 20,)
-                    ],
-                  )
-                ],
-              ),
-              const SizedBox(height: 20,),
-              Text("${widget.productData.title}", style: TextStyle(fontSize: 20, color: ShopeeColors.textDark, fontWeight: FontWeight.bold),),
-              const SizedBox(height: 20,),
-
-              Text("Description:", style: TextStyle(fontSize: 20, color: ShopeeColors.textDark, fontWeight: FontWeight.bold),),
-              const SizedBox(height: 10,),
-              Text("${widget.productData.description}", style: TextStyle(fontSize: 20, color: Colors.grey, fontWeight: FontWeight.bold),),
+              Image.network(height: 200, width: 400, widget.url),
+              const SizedBox(height: 20),
+              Text("${widget.productData.title}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Text("Price: ${widget.productData.price}\$", style: TextStyle(fontSize: 18, color: Colors.teal)),
+              const SizedBox(height: 10),
+              Text("Rating: ${widget.productData.rating}", style: TextStyle(fontSize: 16)),
+              const SizedBox(height: 20),
+              Text("Description:", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 10),
+              Text("${widget.productData.description}", style: TextStyle(fontSize: 16, color: Colors.grey)),
             ],
           ),
         ),
       ),
       bottomNavigationBar: Container(
         height: 80,
-        decoration: BoxDecoration(
-          color: ShopeeColors.textGray
-        ),
+        decoration: BoxDecoration(color: ShopeeColors.textGray),
         child: Row(
           children: [
             Container(
               width: 200,
               height: 80,
-              decoration: BoxDecoration(
-                color: Colors.teal
-              ),
-              child: IconButton(onPressed: (){
-                showDialog(context: context, builder: (context)=>
-                    AlertDialog(
-                      title: Text("Thông báo"),
-                      content: Text("Thêm sản phẩm thành công"),
-                    )
-                );
-              }, icon: Icon(Icons.shopping_cart_sharp, size: 30, color: Colors.white,)),
-            ),
+              color: Colors.teal,
+              child: IconButton(
+                onPressed: () {
+                  addToCart(widget.productData);
 
-            Container(
-              width: 225,
-              decoration: BoxDecoration(
-                color: ShopeeColors.primary
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text("Thông báo"),
+                      content: Text("${widget.productData.title} đã được thêm vào giỏ hàng!"),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text("OK"),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                icon: Icon(Icons.shopping_cart_sharp, size: 30, color: Colors.white),
               ),
-              child: Center(
-                child: Text("${widget.productData.price}đ", style:const TextStyle(fontSize: 30, color: ShopeeColors.white, fontWeight: FontWeight.bold),),
+            ),
+            Expanded(
+              child: Container(
+                color: ShopeeColors.primary,
+                child: Center(
+                  child: Text("${widget.productData.price}\$", style: const TextStyle(fontSize: 30, color: Colors.white, fontWeight: FontWeight.bold)),
+                ),
               ),
             ),
           ],
@@ -95,4 +114,3 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     );
   }
 }
-
