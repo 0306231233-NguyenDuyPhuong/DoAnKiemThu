@@ -1,23 +1,26 @@
-import static com.kms.katalon.core.checkpoint.CheckpointFactory.findCheckpoint
-import static com.kms.katalon.core.testcase.TestCaseFactory.findTestCase
 import static com.kms.katalon.core.testdata.TestDataFactory.findTestData
-import static com.kms.katalon.core.testobject.ObjectRepository.findTestObject
-import static com.kms.katalon.core.testobject.ObjectRepository.findWindowsObject
-import com.kms.katalon.core.checkpoint.Checkpoint as Checkpoint
-import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
-import com.kms.katalon.core.mobile.keyword.MobileBuiltInKeywords as Mobile
-import com.kms.katalon.core.model.FailureHandling as FailureHandling
-import com.kms.katalon.core.testcase.TestCase as TestCase
-import com.kms.katalon.core.testdata.TestData as TestData
-import com.kms.katalon.core.testng.keyword.TestNGBuiltinKeywords as TestNGKW
-import com.kms.katalon.core.testobject.TestObject as TestObject
+import com.kms.katalon.core.testobject.RequestObject
 import com.kms.katalon.core.webservice.keyword.WSBuiltInKeywords as WS
-import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
-import com.kms.katalon.core.windows.keyword.WindowsBuiltinKeywords as Windows
-import internal.GlobalVariable as GlobalVariable
-import org.openqa.selenium.Keys as Keys
 
-res = WS.sendRequest(findTestObject('Post/Delete Post'))
+// Lấy dữ liệu từ Test Data
+def data = findTestData("Posts_DELETE") // Excel sheet DELETE 5 dòng
 
-WS.verifyResponseStatusCode(res, 200)
+for (def i = 1; i <= data.getRowNumbers(); i++) {
+    def id = data.getValue('id', i)
 
+    // Tạo TestObject DELETE request
+    RequestObject request = new RequestObject()
+    request.setRestRequestMethod('DELETE')
+    request.setRestUrl("https://dummyjson.com/posts/${id}") // DELETE theo ID
+
+    // Gửi request
+    def response = WS.sendRequest(request)
+
+    // Verify status code
+    WS.verifyResponseStatusCode(response, 200) // DELETE trả 200 nếu thành công
+
+    // In ra response
+    WS.comment("Response for ID ${id}: " + response.getResponseText())
+}
+
+print("Test delete post thành công")

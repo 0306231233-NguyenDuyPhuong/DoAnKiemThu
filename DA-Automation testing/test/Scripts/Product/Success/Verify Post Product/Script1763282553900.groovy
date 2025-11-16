@@ -5,11 +5,12 @@ import com.kms.katalon.core.testobject.impl.HttpTextBodyContent
 import com.kms.katalon.core.webservice.keyword.WSBuiltInKeywords as WS
 import static com.kms.katalon.core.testdata.TestDataFactory.findTestData
 
-// Lấy dữ liệu từ Test Data
-def data = findTestData("Products_PUT")
 
+// Lấy dữ liệu từ Test Data
+def data = findTestData("Products_POST")
+
+// Lặp từng dòng
 for (def i = 1; i <= data.getRowNumbers(); i++) {
-    def id = data.getValue('id', i)
     def title = data.getValue('title', i)
     def description = data.getValue('description', i)
     def price = data.getValue('price', i)
@@ -30,13 +31,13 @@ for (def i = 1; i <= data.getRowNumbers(); i++) {
         stock: stock.toInteger(),
         brand: brand,
         category: category,
-        thumbnail: thumbnail
+        thumbnail: thumbnail,
     ]
 
-    // Tạo TestObject PUT request
+    // Tạo TestObject POST request
     RequestObject request = new RequestObject()
-    request.setRestRequestMethod('PUT')
-    request.setRestUrl("https://dummyjson.com/products/${id}")
+    request.setRestRequestMethod('POST')
+    request.setRestUrl('https://dummyjson.com/products/add')
     request.setHttpHeaderProperties([
         new TestObjectProperty('Content-Type', com.kms.katalon.core.testobject.ConditionType.EQUALS, 'application/json')
     ])
@@ -44,8 +45,8 @@ for (def i = 1; i <= data.getRowNumbers(); i++) {
 
     // Gửi request
     def response = WS.sendRequest(request)
-    WS.verifyResponseStatusCode(response, 200)
+    WS.verifyResponseStatusCode(response, 201)
     WS.comment("Response: " + response.getResponseText())
 }
 
-print("Test update thành công")
+print("Test thành công");

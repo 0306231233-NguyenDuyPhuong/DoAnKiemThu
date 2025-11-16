@@ -1,23 +1,34 @@
-import static com.kms.katalon.core.checkpoint.CheckpointFactory.findCheckpoint
-import static com.kms.katalon.core.testcase.TestCaseFactory.findTestCase
 import static com.kms.katalon.core.testdata.TestDataFactory.findTestData
-import static com.kms.katalon.core.testobject.ObjectRepository.findTestObject
-import static com.kms.katalon.core.testobject.ObjectRepository.findWindowsObject
-import com.kms.katalon.core.checkpoint.Checkpoint as Checkpoint
-import com.kms.katalon.core.cucumber.keyword.CucumberBuiltinKeywords as CucumberKW
-import com.kms.katalon.core.mobile.keyword.MobileBuiltInKeywords as Mobile
-import com.kms.katalon.core.model.FailureHandling as FailureHandling
-import com.kms.katalon.core.testcase.TestCase as TestCase
-import com.kms.katalon.core.testdata.TestData as TestData
-import com.kms.katalon.core.testng.keyword.TestNGBuiltinKeywords as TestNGKW
-import com.kms.katalon.core.testobject.TestObject as TestObject
+import com.kms.katalon.core.testobject.RequestObject
+import com.kms.katalon.core.testobject.TestObjectProperty
+import com.kms.katalon.core.testobject.impl.HttpTextBodyContent
 import com.kms.katalon.core.webservice.keyword.WSBuiltInKeywords as WS
-import com.kms.katalon.core.webui.keyword.WebUiBuiltInKeywords as WebUI
-import com.kms.katalon.core.windows.keyword.WindowsBuiltinKeywords as Windows
-import internal.GlobalVariable as GlobalVariable
-import org.openqa.selenium.Keys as Keys
 
-res = WS.sendRequest(findTestObject('User/Post Login User'))
+// Lấy dữ liệu từ Test Data
+def data = findTestData("Users_Login_POST")
 
-WS.verifyResponseStatusCode(res, 200)
+for (def i = 1; i <= data.getRowNumbers(); i++) {
+    def username = data.getValue('username', i)
+    def password = data.getValue('password', i)
+    // Tạo JSON body
+    def jsonBody = [
+        username: username,
+        password: password,
+    ]
 
+    // Tạo TestObject POST request
+    RequestObject request = new RequestObject()
+    request.setRestRequestMethod('POST')
+    request.setRestUrl('https://dummyjson.com/users/add')
+    request.setHttpHeaderProperties([
+        new TestObjectProperty('Content-Type', com.kms.katalon.core.testobject.ConditionType.EQUALS, 'application/json')
+    ])
+    request.setBodyContent(new HttpTextBodyContent(groovy.json.JsonOutput.toJson(jsonBody), 'UTF-8', 'application/json'))
+
+    // Gửi request
+    def response = WS.sendRequest(request)
+    WS.verifyResponseStatusCode(response, 201)
+    WS.comment("Response: " + response.getResponseText())
+}
+
+print("Test tạo user thành công")
